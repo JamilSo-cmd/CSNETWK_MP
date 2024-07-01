@@ -10,7 +10,7 @@ public class Client {
     public static void main(String args[]){
 
 		String sServerAddress;
-		String username = args[0];
+		String username = "";
         String input; 
         int nPort;
         
@@ -24,22 +24,40 @@ public class Client {
             
             switch (input){
 
+                //connnects client to server
                 case "/join": 
                 sServerAddress = scanner.next();
                 nPort = scanner.nextInt();
                 System.out.println("input is "+sServerAddress+" and " + nPort);
                 connectToServer(sServerAddress,nPort);
                 break;
+
+                //disconnects client to server
                 case "/leave":;
                 break; 
-                case "/register":;
+
+                //registers a unique handle or alias
+                case "/register":
+                username = scanner.next();
                 break;
+
+                //sends file to server
                 case "/store":;
                 break;
+
+                //request directory file list from a server
                 case "/dir":;
                 break;
+
+                //fetch a file from a server
                 case "/get":;
                 break;
+                
+                //request command to help to output all input Syntax commands for references
+                case "/?":;
+                break;
+
+                //closes the client
                 case "/close": flag = false;
                 break;
                 default: System.out.println("try again");
