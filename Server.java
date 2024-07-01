@@ -11,6 +11,17 @@ public class Server {
 		ServerSocket serverSocket;
 		Socket serverEndpoint;
 
+        try{
+
+
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        finally{
+			System.out.println("Server: Connection is terminated.");
+        }
+
     }
 
 
