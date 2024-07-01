@@ -1,10 +1,15 @@
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.*;
 
 public class Server {
 
-    static void main(String args[]){
+    public static void main(String args[]){
 
-        
+        int nPort = Integer.parseInt(args[0]);
+		System.out.println("Server: Listening on port " + args[0] + "...");
+		ServerSocket serverSocket;
+		Socket serverEndpoint;
 
     }
 
