@@ -12,8 +12,13 @@ public class Server {
 		Socket serverEndpoint;
 
         try{
+            serverSocket = new ServerSocket(nPort);
+            serverEndpoint = serverSocket.accept();
+
+			System.out.println("Server: New client connected: " + serverEndpoint.getRemoteSocketAddress());
 
 
+            serverSocket.close();
         }
         catch(Exception e){
             e.printStackTrace();
