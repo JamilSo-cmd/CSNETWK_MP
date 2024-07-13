@@ -13,7 +13,7 @@ public class Client {
 		String username = "";
         String input; 
         int nPort;
-        
+        Socket clientEndpoint = null;
         boolean flag = true;
         Scanner scanner = new Scanner(System.in);
 
@@ -26,15 +26,32 @@ public class Client {
 
                 //connnects client to server
                 case "/join": 
-                
+                //get address and port
                 sServerAddress = scanner.next();
                 nPort = scanner.nextInt();
                 System.out.println("input is "+sServerAddress+" and " + nPort);
-                connectToServer(sServerAddress,nPort);
+                //connecting to Server
+                try{
+                    clientEndpoint = new Socket(sServerAddress, nPort);
+                    System.out.println("Connection to the File Exchange Server is successful!");
+                }
+                catch(Exception e){
+                    System.out.println("Error: Connection to the Server\r\n" + //
+                                        "has failed! Please check IP\r\n" + //
+                                        "Address and Port Number.");
+                }
+
                 break;
 
                 //disconnects client to server
                 case "/leave":;
+                    try{
+                        clientEndpoint.close();
+                        System.out.println("Connection closed. Thank you!");
+                    }
+                    catch(Exception e){
+                        System.out.println("Error: There is no connection to close.");
+                    }
                 break; 
 
                 //registers a unique handle or alias
@@ -75,20 +92,4 @@ public class Client {
         scanner.close();
     }
     
-    //connects client to server
-    public static void connectToServer(String sServerAddress, int nPort){
-        
-        try{
-
-            Socket clientEndpoint = new Socket(sServerAddress, nPort);
-
-			System.out.println("Connection to the File Exchange Server is successful!");
-            
-        }
-        catch(Exception e){
-			System.out.println("Error: Connection to the Server\r\n" + //
-                                "has failed! Please check IP\r\n" + //
-                                "Address and Port Number.");
-        }
-    }
 }
