@@ -12,7 +12,7 @@ public class Client {
 		String sServerAddress;
 		String username = "";
         String input; 
-        int nPort;
+        int nPort = 0;
         Socket clientEndpoint = null;
         boolean flag = true;
         Scanner scanner = new Scanner(System.in);
@@ -26,28 +26,32 @@ public class Client {
 
                 //connnects client to server
                 case "/join": 
-                //get address and port
-                sServerAddress = scanner.next();
-                nPort = scanner.nextInt();
-                System.out.println("input is "+sServerAddress+" and " + nPort);
-                //connecting to Server
-                try{
-                    clientEndpoint = new Socket(sServerAddress, nPort);
-                    System.out.println("Connection to the File Exchange Server is successful!");
-                }
-                catch(Exception e){
-                    System.out.println("Error: Connection to the Server\r\n" + //
-                                        "has failed! Please check IP\r\n" + //
-                                        "Address and Port Number.");
-                }
-
+                    //get address and port
+                    try{
+                        sServerAddress = scanner.next();
+                        nPort = scanner.nextInt();
+                        System.out.println("input is "+sServerAddress+" and " + nPort);
+                        //connecting to Server
+                        clientEndpoint = new Socket(sServerAddress, nPort);
+                        System.out.println("Connection to the File Exchange Server is successful!");
+                    }
+                    catch(Exception e){
+                    //send error message
+                        System.out.println("Error: Connection to the Server\r\n" + //
+                                            "has failed! Please check IP\r\n" + //
+                                            "Address and Port Number.");
+                        scanner.nextLine();
+                    }
                 break;
 
                 //disconnects client to server
-                case "/leave":;
+                case "/leave":
+                //attempt to close the connection
                     try{
                         clientEndpoint.close();
                         System.out.println("Connection closed. Thank you!");
+                        //send notif to server that client has left
+
                     }
                     catch(Exception e){
                         System.out.println("Error: There is no connection to close.");
@@ -60,7 +64,8 @@ public class Client {
                 break;
 
                 //sends file to server
-                case "/store":;
+                case "/store":
+                    
                 break;
 
                 //request directory file list from a server
