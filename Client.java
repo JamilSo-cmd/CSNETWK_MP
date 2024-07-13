@@ -26,6 +26,7 @@ public class Client {
 
                 //connnects client to server
                 case "/join": 
+                
                 sServerAddress = scanner.next();
                 nPort = scanner.nextInt();
                 System.out.println("input is "+sServerAddress+" and " + nPort);
@@ -55,15 +56,23 @@ public class Client {
                 
                 //request command to help to output all input Syntax commands for references
                 case "/?":;
+                System.out.println(
+                                    "Connect to the server application          ----- /join <server_ip_add> <port>\r\n" + //
+                                    "Disconnect to the server application       ----- /leave\r\n" + //
+                                    "Register a unique handle or alias          ----- /register <handle>\r\n" + //
+                                    "Send file to server                        ----- /store <filename>\r\n" + //
+                                    "Request directory file list from a server  ----- /dir\r\n" + //
+                                    "Fetch a file from a server                 ----- /get <filename>\r\n");
                 break;
 
                 //closes the client
                 case "/close": flag = false;
                 break;
-                default: System.out.println("try again");
+                default: System.out.println("Error: Command not found.");
             }
         }
 
+        scanner.close();
     }
     
     //connects client to server
@@ -73,11 +82,13 @@ public class Client {
 
             Socket clientEndpoint = new Socket(sServerAddress, nPort);
 
-			System.out.println("Client: Connected to server at" + clientEndpoint.getRemoteSocketAddress());
+			System.out.println("Connection to the File Exchange Server is successful!");
             
         }
         catch(Exception e){
-            e.printStackTrace();
+			System.out.println("Error: Connection to the Server\r\n" + //
+                                "has failed! Please check IP\r\n" + //
+                                "Address and Port Number.");
         }
     }
 }
