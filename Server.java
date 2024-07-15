@@ -85,19 +85,58 @@ class ClientHandler implements Runnable {
     }
 
     private void sendDir(PrintWriter writer) {
-    
+        File[] files = new File(".").listFiles();
+        if (files != null) {
+            for (File file : files) {
+                writer.println(file.getName());
+            }
+        }
     }
 
     private void registerAlias(String alias, PrintWriter writer) {
-       
+        if (!aliases.contains(alias)) {
+            aliases.add(alias);
+            writer.write(1);
+        } else {
+            writer.write(0);
+        }
+        writer.flush();
     }
 
     private void receiveFile(String filename, InputStream input) throws IOException {
-       
+        byte[] sizeBytes = input.readNBytes(4);
+        int fileSize = ByteBuffer.wrap(sizeBytes).getInt();
+        try (FileOutputStream fileOutput = new FileOutputStream(filename)) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            int totalRead = 0;
+            while ((bytesRead = input.read(buffer)) != -1) {
+                fileOutput.write(buffer, 0, bytesRead);
+                totalRead += bytesRead;
+                if (totalRead >= fileSize) {
+                    break;
+                }
+            }
+        }
     }
 
     private void sendFile(String filename, OutputStream output) throws IOException {
-      
+        File file = new File(filename);
+        if (file.exists()) {
+            output.write(1);
+            byte[] sizeBytes = ByteBuffer.allocate(4).putInt((int) file.length()).array();
+            output.write(sizeBytes);
+            try (FileInputStream fileInput = new FileInputStream(file)) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = fileInput.read(buffer)) != -1) {
+                    output.write(buffer, 0, bytesRead);
+                }
+            }
+        } else {
+            output.write(0);
+        }
+        output.flush();
     }
 }
 
