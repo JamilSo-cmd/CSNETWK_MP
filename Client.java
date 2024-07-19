@@ -13,91 +13,97 @@ public class Client {
     private static int portNum;
     //driver for Client
     //run java Client <username>
-    public static void main(String args[]){
+    public static void main(String[] args) {
         String[] tokens;
         String input;
         String command;
         boolean flag = true;
-
+    
         Scanner scanner = new Scanner(System.in);
-
-        while(flag == true){
+    
+        while (flag) {
             System.out.print("Enter Command: ");
             input = scanner.nextLine();
             tokens = input.split(" ");
             command = tokens[0];
-
-            switch (command){
-                //connnects client to server
-                case "/join": 
-                    if(tokens.length == 3) {
+    
+            switch (command) {
+                // Connects client to server
+                case "/join":
+                    if (tokens.length == 3) {
                         Client.serverIP = tokens[1];
                         Client.portNum = Integer.parseInt(tokens[2]);
                         Client.joinCommand();
                     } else {
-                        System.out.println("Invalid command syntax. Usage: /join <server_ip_add> <port>");
+                        System.out.println("Error: Command parameters do not match or is not allowed.");
+                        System.out.println("Usage: /join <server_ip_add> <port>");
                     }
-                break;
-
-                //disconnects client to server
+                    break;
+    
+                // Disconnects client from server
                 case "/leave":
                     Client.leaveCommand();
-                break; 
-
-                //registers a unique handle or alias
+                    break;
+    
+                // Registers a unique handle or alias
                 case "/register":
-                    if(tokens.length == 2) {
+                    if (tokens.length == 2) {
                         String alias = tokens[1];
                         Client.registerCommand(alias);
                     } else {
-                        System.out.println("Invalid command syntax. Usage: /register <username>");
+                        System.out.println("Error: Command parameters do not match or is not allowed.");
+                        System.out.println("Usage: /register <username>");
                     }
-                break;
-
-                //sends file to server
+                    break;
+    
+                // Sends file to server
                 case "/store":
-                    if(tokens.length == 2) {
+                    if (tokens.length == 2) {
                         Client.storeCommand(tokens[1]);
                     } else {
-                        System.out.println("Invalid command syntax. Usage: /store <file name>");
+                        System.out.println("Error: Command parameters do not match or is not allowed.");
+                        System.out.println("Usage: /store <file name>");
                     }
-                break;
-
-                //request directory file list from a server
-                case "/dir":;
-                break;
-
-                //fetch a file from a server
-                case "/get":;
-                    if(tokens.length == 2) {
+                    break;
+    
+                // Request directory file list from a server
+                case "/dir":
+                    // Placeholder for dir command
+                    break;
+    
+                // Fetch a file from a server
+                case "/get":
+                    if (tokens.length == 2) {
                         Client.getCommand(tokens[1]);
                     } else {
-                        System.out.println("Invalid command syntax. Usage: /store <file name>");
+                        System.out.println("Error: Command parameters do not match or is not allowed.");
+                        System.out.println("Usage: /get <file name>");
                     }
-                break;
-                
-                //request command to help to output all input Syntax commands for references
-                case "/?":;
-                System.out.println(
-                                    "Connect to the server application          ----- /join <server_ip_add> <port>\r\n" + //
-                                    "Disconnect to the server application       ----- /leave\r\n" + //
-                                    "Register a unique handle or alias          ----- /register <handle>\r\n" + //
-                                    "Send file to server                        ----- /store <filename>\r\n" + //
-                                    "Request directory file list from a server  ----- /dir\r\n" + //
-                                    "Fetch a file from a server                 ----- /get <filename>\r\n");
-                break;
-
-                //closes the client
-                case "/close": flag = false;
-                break;
-
-                default: System.out.println("Error: Command not found.");
+                    break;
+    
+                // Request command to help to output all input Syntax commands for references
+                case "/?":
+                    System.out.println(
+                            "Connect to the server application          ----- /join <server_ip_add> <port>\r\n" +
+                            "Disconnect to the server application       ----- /leave\r\n" +
+                            "Register a unique handle or alias          ----- /register <handle>\r\n" +
+                            "Send file to server                        ----- /store <filename>\r\n" +
+                            "Request directory file list from a server  ----- /dir\r\n" +
+                            "Fetch a file from a server                 ----- /get <filename>\r\n");
+                    break;
+    
+                // Closes the client
+                case "/close":
+                    flag = false;
+                    break;
+    
+                default:
+                    System.out.println("Error: Command not found.");
             }
         }
     
         scanner.close();
     }
-
     
     private static void joinCommand() {
         try{
@@ -122,6 +128,10 @@ public class Client {
 
     private static void registerCommand(String handle) {
         try {
+            if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
+                throw new IllegalStateException("Error: Please connect to the server first using /join command.");
+            }
+    
             OutputStream outputStream = clientEndpoint.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true);
     
@@ -140,11 +150,14 @@ public class Client {
                 System.out.println("Error: Registration failed. Handle or alias already exists.");
             }
     
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
         } catch (IOException e) {
             System.err.println("Error: Failed to send registration command.");
             e.printStackTrace();
         }
     }
+    
     
 
     private static void leaveCommand() {
