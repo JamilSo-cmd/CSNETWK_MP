@@ -68,7 +68,7 @@ public class Client {
     
                 // Request directory file list from a server
                 case "/dir":
-                    // Placeholder for dir command
+                    Client.dirCommand();
                     break;
     
                 // Fetch a file from a server
@@ -126,6 +126,25 @@ public class Client {
         }
     }
 
+    private static void leaveCommand() {
+        if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
+            System.out.println("Error: Disconnection failed. Please connect to the server first.");
+        } else {
+            try {
+                // Notify the server that the client is leaving
+                OutputStream outputStream = Client.clientEndpoint.getOutputStream();
+                PrintWriter writer = new PrintWriter(outputStream, true);
+                writer.println("leave");
+    
+                // Close the connection
+                Client.clientEndpoint.close();
+                System.out.println("Connection closed. Thank you!");
+            } catch (Exception e) {
+                System.out.println("Error: There is no connection to close.");
+            }
+        }
+    }
+
     private static void registerCommand(String handle) {
         try {
             if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
@@ -157,65 +176,82 @@ public class Client {
             e.printStackTrace();
         }
     }
-    
-    
-
-    private static void leaveCommand() {
-        if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
-            System.out.println("Error: Disconnection failed. Please connect to the server first.");
-        } else {
-            try {
-                // Notify the server that the client is leaving
-                OutputStream outputStream = Client.clientEndpoint.getOutputStream();
-                PrintWriter writer = new PrintWriter(outputStream, true);
-                writer.println("leave");
-    
-                // Close the connection
-                Client.clientEndpoint.close();
-                System.out.println("Connection closed. Thank you!");
-            } catch (Exception e) {
-                System.out.println("Error: There is no connection to close.");
-            }
-        }
-    }
 
     private static void storeCommand(String filename) {
         try {
+            if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
+                throw new IllegalStateException("Error: Please connect to the server first using /join command.");
+            }
             File fileToSend = new File(filename);
             if (!fileToSend.exists()) {
                 System.out.println("Error: File not found.");
                 return;
             }
-
+    
             // Send 'store' command
             OutputStream outputStream = clientEndpoint.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true);
             writer.println("store");
-
+    
             // Send filename
             writer.println(filename);
-
+    
             // Send file size
             long fileSize = fileToSend.length();
-            ByteBuffer sizeBuffer = ByteBuffer.allocate(4).putInt((int) fileSize);
+            ByteBuffer sizeBuffer = ByteBuffer.allocate(8).putLong(fileSize);
             outputStream.write(sizeBuffer.array());
-
+    
             // Send file content
             byte[] buffer = new byte[8192];
-            FileInputStream fileInputStream = new FileInputStream(fileToSend);
-            int bytesRead;
-            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
+            try (FileInputStream fileInputStream = new FileInputStream(fileToSend)) {
+                int bytesRead;
+                while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
             }
-
-            fileInputStream.close();
+    
             outputStream.flush();
+            System.out.println("File sent successfully.");
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
         } catch (IOException e) {
             System.out.println("Error: Failed to send file to server.");
+            e.printStackTrace();
         }
     }
+    
+
+    private static void dirCommand() {
+        if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
+            System.out.println("Error: Please connect to the server first using /join command.");
+            return;
+        }
+        try {
+            // Send 'dir' command
+            OutputStream outputStream = clientEndpoint.getOutputStream();
+            PrintWriter writer = new PrintWriter(outputStream, true);
+            writer.println("dir");
+    
+            // Receive directory list from server
+            InputStream inputStream = clientEndpoint.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String fileName;
+            System.out.println("Directory file list:");
+            while ((fileName = reader.readLine()) != null) {
+                System.out.println(fileName);
+            }
+        } catch (IOException e) {
+            System.out.println("Error: Failed to request directory file list from server.");
+            e.printStackTrace();
+        }
+    }
+    
 
     private static void getCommand(String filename) {
+        if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
+            System.out.println("Error: Please connect to the server first using /join command.");
+            return;
+        }
         try {
             // Send 'get' command
             OutputStream outputStream = clientEndpoint.getOutputStream();
