@@ -144,6 +144,7 @@ class ClientHandler implements Runnable {
     }
 
     private void receiveFile(String filename, InputStream input) throws IOException {
+        input.skip(4);
         byte[] sizeBytes = input.readNBytes(4);
         int fileSize = ByteBuffer.wrap(sizeBytes).getInt();
         try (FileOutputStream fileOutput = new FileOutputStream(filename)) {
@@ -151,6 +152,7 @@ class ClientHandler implements Runnable {
             int bytesRead;
             int totalRead = 0;
             while ((bytesRead = input.read(buffer)) != -1) {
+                System.out.println(bytesRead);
                 fileOutput.write(buffer, 0, bytesRead);
                 totalRead += bytesRead;
                 if (totalRead >= fileSize) {

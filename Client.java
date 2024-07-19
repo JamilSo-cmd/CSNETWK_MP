@@ -189,7 +189,7 @@ public class Client {
             // Send 'store' command
             OutputStream outputStream = clientEndpoint.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true);
-            writer.println("store ");
+            writer.println("store");
     
             // Send filename
             writer.println(filename);
@@ -254,8 +254,7 @@ public class Client {
             // Send 'get' command
             OutputStream outputStream = clientEndpoint.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true);
-            System.out.println("Testing");
-            writer.println("get ");
+            writer.println("get");
 
             // Send filename
             writer.println(filename);
@@ -275,23 +274,25 @@ public class Client {
                 System.out.println("Error: File not found on the server.");
             }
 
-            // Clean up
-            inputStream.close();
-            outputStream.close();
         } catch (IOException e) {
             System.out.println("Error: Failed to retrieve file from server.");
         }
     }
 
-    private static void receiveFile(String filename, InputStream inputStream) {
-        try (FileOutputStream fileOutputStream = new FileOutputStream(filename)) {
-            byte[] buffer = new byte[8192];
+    private static void receiveFile(String filename, InputStream input) throws IOException {
+        byte[] sizeBytes = input.readNBytes(4);
+        int fileSize = ByteBuffer.wrap(sizeBytes).getInt();
+        try (FileOutputStream fileOutput = new FileOutputStream(filename)) {
+            byte[] buffer = new byte[1024];
             int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                fileOutputStream.write(buffer, 0, bytesRead);
+            int totalRead = 0;
+            while ((bytesRead = input.read(buffer)) != -1) {
+                fileOutput.write(buffer, 0, bytesRead);
+                totalRead += bytesRead;
+                if (totalRead >= fileSize) {
+                    break;
+                }
             }
-        } catch (IOException e) {
-            System.out.println("Error: Failed to write file.");
         }
     }
 }
