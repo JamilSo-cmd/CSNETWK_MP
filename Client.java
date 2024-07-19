@@ -1,9 +1,7 @@
+import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.io.*;
 
 
 public class Client {
@@ -191,7 +189,7 @@ public class Client {
             // Send 'store' command
             OutputStream outputStream = clientEndpoint.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true);
-            writer.println("store");
+            writer.println("store ");
     
             // Send filename
             writer.println(filename);
@@ -256,7 +254,8 @@ public class Client {
             // Send 'get' command
             OutputStream outputStream = clientEndpoint.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true);
-            writer.println("get");
+            System.out.println("Testing");
+            writer.println("get ");
 
             // Send filename
             writer.println(filename);
