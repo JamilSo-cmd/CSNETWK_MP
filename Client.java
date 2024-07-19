@@ -123,20 +123,21 @@ public class Client {
         try {
             OutputStream outputStream = clientEndpoint.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true);
-
+    
             // Sending registration command to server
-            writer.println("/reg " + handle);
-
+            writer.println("register");
+            writer.println(handle);
+    
             // Optionally, read response from server if needed
             InputStream inputStream = clientEndpoint.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String response = reader.readLine();
-            if(response == "1") {
+            if ("1".equals(response)) {
                 System.out.println("Welcome " + handle + "!");
             } else {
-                System.out.println("");
+                System.out.println("Error: Registration failed. Handle or alias already exists.");
             }
-
+    
         } catch (IOException e) {
             System.err.println("Error: Failed to send registration command.");
             e.printStackTrace();
