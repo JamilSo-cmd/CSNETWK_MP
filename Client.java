@@ -111,7 +111,8 @@ public class Client {
             writer.write(serverIP + "\n"); // Sending server IP
             writer.write(portNum + "\n"); // Sending port number
             writer.flush();
-            System.out.println("Connection to the server is successful!");
+            System.out.println("Connection to the File Exchange " + //
+                                "Server is successful!");
         }
         catch(Exception e){
         //send error message
@@ -125,13 +126,14 @@ public class Client {
             PrintWriter writer = new PrintWriter(outputStream, true);
     
             // Sending registration command to server
-            writer.println("register");
+            writer.println("register");  // Correct command format
             writer.println(handle);
     
             // Optionally, read response from server if needed
             InputStream inputStream = clientEndpoint.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String response = reader.readLine();
+            //System.out.println("Client received response: " + response); // Debugging output
             if ("1".equals(response)) {
                 System.out.println("Welcome " + handle + "!");
             } else {
@@ -143,15 +145,24 @@ public class Client {
             e.printStackTrace();
         }
     }
+    
 
     private static void leaveCommand() {
-        try{
-            Client.clientEndpoint.close();
-            System.out.println("Connection closed. Thank you!");
-            //send notif to server that client has left
-        }
-        catch(Exception e){
-            System.out.println("Error: There is no connection to close.");
+        if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
+            System.out.println("Error: Disconnection failed. Please connect to the server first.");
+        } else {
+            try {
+                // Notify the server that the client is leaving
+                OutputStream outputStream = Client.clientEndpoint.getOutputStream();
+                PrintWriter writer = new PrintWriter(outputStream, true);
+                writer.println("leave");
+    
+                // Close the connection
+                Client.clientEndpoint.close();
+                System.out.println("Connection closed. Thank you!");
+            } catch (Exception e) {
+                System.out.println("Error: There is no connection to close.");
+            }
         }
     }
 
