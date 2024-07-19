@@ -96,12 +96,12 @@ class ClientHandler implements Runnable {
     private void registerAlias(String alias, PrintWriter writer) {
         if (!aliases.contains(alias)) {
             aliases.add(alias);
-            writer.write(1);
+            writer.println("1");
         } else {
-            writer.write(0);
+            writer.println("0");
         }
         writer.flush();
-    }
+    }    
 
     private void receiveFile(String filename, InputStream input) throws IOException {
         byte[] sizeBytes = input.readNBytes(4);
