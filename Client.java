@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -9,6 +11,7 @@ public class Client {
     private static Socket clientEndpoint;
     private static String serverIP;
     private static int portNum;
+    private static String alias = "";
     //driver for Client
     //run java Client <username>
     public static void main(String[] args) {
@@ -46,7 +49,7 @@ public class Client {
                 // Registers a unique handle or alias
                 case "/register":
                     if (tokens.length == 2) {
-                        String alias = tokens[1];
+                        alias = tokens[1];
                         Client.registerCommand(alias);
                     } else {
                         System.out.println("Error: Command parameters do not match or is not allowed.");
@@ -207,9 +210,13 @@ public class Client {
                     outputStream.write(buffer, 0, bytesRead);
                 }
             }
-    
+            TimeZone tz = TimeZone.getTimeZone("UTC");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // Quoted "Z" to indicate UTC, no timezone offset
+            df.setTimeZone(tz);
+            String nowAsISO = df.format(new Date());
+
             outputStream.flush();
-            System.out.println("File sent successfully.");
+            System.out.println( alias +"<"+ nowAsISO +">: Uploaded Hello.txt");
         } catch (IllegalStateException e) {
             System.out.println(e.getMessage());
         } catch (IOException e) {
@@ -236,7 +243,11 @@ public class Client {
             String fileName;
             System.out.println("Directory file list:");
             while ((fileName = reader.readLine()) != null) {
-                System.out.println(fileName);
+                if("ClientHandler.class".equals(fileName) || "Server.class".equals(fileName) || "Server.java".equals(fileName) ){
+                }
+                else{
+                    System.out.println(fileName);
+                }
             }
         } catch (IOException e) {
             System.out.println("Error: Failed to request directory file list from server.");

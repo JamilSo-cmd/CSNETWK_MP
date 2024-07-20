@@ -152,7 +152,6 @@ class ClientHandler implements Runnable {
             int bytesRead;
             int totalRead = 0;
             while ((bytesRead = input.read(buffer)) != -1) {
-                System.out.println(bytesRead);
                 fileOutput.write(buffer, 0, bytesRead);
                 totalRead += bytesRead;
                 if (totalRead >= fileSize) {
