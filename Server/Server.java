@@ -156,6 +156,7 @@ class ClientHandler implements Runnable {
             for (File file : files) {
                 writer.println(file.getName());
             }
+            writer.println("END_OF_LIST");
         }
     }
 

@@ -216,7 +216,7 @@ public class Client {
             String nowAsISO = df.format(new Date());
 
             outputStream.flush();
-            System.out.println( alias +"<"+ nowAsISO +">: Uploaded Hello.txt");
+            System.out.println( alias +"<"+ nowAsISO +">: Uploaded "+ filename);
         } catch (IllegalStateException e) {
             System.out.println(e.getMessage());
         } catch (IOException e) {
@@ -243,11 +243,12 @@ public class Client {
             String fileName;
             System.out.println("Directory file list:");
             while ((fileName = reader.readLine()) != null) {
-                if("ClientHandler.class".equals(fileName) || "Server.class".equals(fileName) || "Server.java".equals(fileName) ){
+
+                if ("END_OF_LIST".equals(fileName)) {
+                    break;
                 }
-                else{
-                    System.out.println(fileName);
-                }
+                if("ClientHandler.class".equals(fileName) || "Server.class".equals(fileName) || "Server.java".equals(fileName) ){}
+                else{System.out.println(fileName);}
             }
         } catch (IOException e) {
             System.out.println("Error: Failed to request directory file list from server.");
