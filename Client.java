@@ -130,7 +130,8 @@ public class Client {
     private static void leaveCommand() {
         if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
             System.out.println("Error: Disconnection failed. Please connect to the server first.");
-        } else {
+        } 
+        else {
             try {
                 // Notify the server that the client is leaving
                 OutputStream outputStream = Client.clientEndpoint.getOutputStream();
@@ -182,6 +183,9 @@ public class Client {
         try {
             if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
                 throw new IllegalStateException("Error: Please connect to the server first using /join command.");
+            } 
+            else if ("".equals(alias)){
+                System.out.println("Error: User is unregistered. Please register first.");
             }
             File fileToSend = new File(filename);
             if (!fileToSend.exists()) {
@@ -229,6 +233,10 @@ public class Client {
     private static void dirCommand() {
         if (Client.clientEndpoint == null || Client.clientEndpoint.isClosed()) {
             System.out.println("Error: Please connect to the server first using /join command.");
+            return;
+        }
+        else if ("".equals(alias)){
+            System.out.println("Error: User is unregistered. Please register first.");
             return;
         }
         try {
