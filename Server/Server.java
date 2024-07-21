@@ -7,6 +7,7 @@ import java.util.concurrent.*;
 public class Server {
 
     private static volatile boolean running = true;
+    private static ServerSocket serverSocket;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -16,26 +17,37 @@ public class Server {
 
         int port = Integer.parseInt(args[0]);
         System.out.println("Server: Listening on port " + port + "...");
-        
+
         // Reinitialize aliases list each time server starts
         List<String> aliases = Collections.synchronizedList(new ArrayList<>());
 
         ExecutorService executorService = Executors.newCachedThreadPool();
 
-        // Shutdown hook to stop the server
+        // Add shutdown hook to handle Ctrl+C (SIGINT) signal
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Server: Shutting down...");
             running = false;
+            try {
+                if (serverSocket != null && !serverSocket.isClosed()) {
+                    serverSocket.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             executorService.shutdown();
             try {
-                executorService.awaitTermination(30, TimeUnit.SECONDS);
+                if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow();
+                }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                executorService.shutdownNow();
+                Thread.currentThread().interrupt();
             }
             System.out.println("Server: Shutdown complete.");
         }));
 
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        try {
+            serverSocket = new ServerSocket(port);
             while (running) {
                 try {
                     serverSocket.setSoTimeout(1000); // Set timeout to check running flag periodically
@@ -47,9 +59,23 @@ public class Server {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            if (running) { // Only log exception if not a planned shutdown
+                e.printStackTrace();
+            }
         } finally {
             System.out.println("Server: Connection is terminated.");
+        }
+    }
+
+    public static void shutdown() {
+        System.out.println("Server: Shutdown command received.");
+        running = false;
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
@@ -113,8 +139,9 @@ class ClientHandler implements Runnable {
                         sendFile(filenameToGet, output);
                         break;
                     case "shutdown":
-                        System.out.println("Server: Shutdown command received.");
-                        System.exit(0);
+                        Server.shutdown();
+                        isConnected = false;
+                        clientSocket.close();
                         break;
                 }
             }
@@ -180,4 +207,3 @@ class ClientHandler implements Runnable {
         output.flush();
     }
 }
-
